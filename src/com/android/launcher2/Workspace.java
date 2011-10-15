@@ -131,7 +131,7 @@ public class Workspace extends ViewGroup implements DropTarget, DragSource, Drag
     private static final float FLING_VELOCITY_INFLUENCE = 0.4f;
     
     private static class WorkspaceOvershootInterpolator implements Interpolator {
-        private static final float DEFAULT_TENSION = 2.0f;
+        private static final float DEFAULT_TENSION = 1.3f;
         private float mTension;
 
         public WorkspaceOvershootInterpolator() {
@@ -915,13 +915,13 @@ public class Workspace extends ViewGroup implements DropTarget, DragSource, Drag
                     // Don't fling across more than one screen at a time.
                     final int bound = scrolledPos < whichScreen ?
                             mCurrentScreen - 1 : mCurrentScreen;
-                    snapToScreen(Math.min(whichScreen, bound), velocityX, false);
+                    snapToScreen(Math.min(whichScreen, bound), velocityX, true);
                 } else if (velocityX < -SNAP_VELOCITY && mCurrentScreen < getChildCount() - 1) {
                     // Fling hard enough to move right
                     // Don't fling across more than one screen at a time.
                     final int bound = scrolledPos > whichScreen ?
                             mCurrentScreen + 1 : mCurrentScreen;
-                    snapToScreen(Math.max(whichScreen, bound), velocityX, false);
+                    snapToScreen(Math.max(whichScreen, bound), velocityX, true);
                 } else {
                     snapToScreen(whichScreen, 0, true);
                 }

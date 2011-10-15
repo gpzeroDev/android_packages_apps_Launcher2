@@ -52,7 +52,7 @@
         launcher:spanX="4"
         launcher:spanY="1" />
 
-  <!--    <appwidget
+    <!--<appwidget
         launcher:packageName="com.android.vending"
         launcher:className="com.android.vending.MarketWidgetProvider"
         launcher:screen="3"

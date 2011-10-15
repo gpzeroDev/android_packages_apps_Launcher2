@@ -70,24 +70,27 @@ void setColor(float r, float g, float b, float a) {
 }
 
 void init() {
-    g_AttractionTable[0] = 20.0f;
+
+    g_AttractionTable[0] = 25.0f;
     g_AttractionTable[1] = 20.0f;
-    g_AttractionTable[2] = 20.0f;
-    g_AttractionTable[3] = 10.0f;
-    g_AttractionTable[4] = -10.0f;
-    g_AttractionTable[5] = -20.0f;
+    g_AttractionTable[2] = 17.0f;
+    g_AttractionTable[3] = 15.0f;
+    g_AttractionTable[4] = -15.0f;
+    g_AttractionTable[5] = -17.0f;
     g_AttractionTable[6] = -20.0f;
-    g_AttractionTable[7] = -20.0f;
-    g_AttractionTable[8] = -20.0f;  // dup 7 to avoid a clamp later
-    g_FrictionTable[0] = 10.0f;
-    g_FrictionTable[1] = 10.0f;
-    g_FrictionTable[2] = 11.0f;
-    g_FrictionTable[3] = 15.0f;
-    g_FrictionTable[4] = 15.0f;
-    g_FrictionTable[5] = 11.0f;
-    g_FrictionTable[6] = 10.0f;
-    g_FrictionTable[7] = 10.0f;
-    g_FrictionTable[8] = 10.0f;  // dup 7 to avoid a clamp later
+    g_AttractionTable[7] = -25.0f;
+    g_AttractionTable[8] = -30.0f;  // dup 7 to avoid a clamp later
+
+    g_FrictionTable[0] = 4.0f;
+    g_FrictionTable[1] = 4.0f;
+    g_FrictionTable[2] = 10.0f;
+    g_FrictionTable[3] = 22.0f;
+    g_FrictionTable[4] = 22.0f;
+    g_FrictionTable[5] = 10.0f;
+    g_FrictionTable[6] = 4.0f;
+    g_FrictionTable[7] = 4.0f;
+    g_FrictionTable[8] = 4.0f;  // dup 7 to avoid a clamp later
+
     g_PhysicsTableSize = 7;
 
     g_PosVelocity = 0;
@@ -110,7 +113,7 @@ void move() {
     if (g_LastTouchDown) {
         float dx = -(state->newPositionX - g_LastPositionX);
         g_PosVelocity = 0;
-        g_PosPage += dx * 5.2f;
+        g_PosPage += dx * 8.2f;
 
         float pmin = -0.49f;
         float pmax = g_PosMax + 0.49f;
@@ -363,7 +366,7 @@ main(int launchID)
     g_DT = minf(g_DT, 0.2f);
 
     if (g_Zoom != state->zoomTarget) {
-        float dz = g_DT * 1.7f;
+        float dz = g_DT * 3.0f;
         if (state->zoomTarget < 0.5f) {
             dz = -dz;
         }
