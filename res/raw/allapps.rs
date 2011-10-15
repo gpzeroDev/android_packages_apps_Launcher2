@@ -110,7 +110,7 @@ void move() {
     if (g_LastTouchDown) {
         float dx = -(state->newPositionX - g_LastPositionX);
         g_PosVelocity = 0;
-        g_PosPage += dx * 8.2f;
+        g_PosPage += dx * 5.2f;
 
         float pmin = -0.49f;
         float pmax = g_PosMax + 0.49f;
@@ -363,7 +363,7 @@ main(int launchID)
     g_DT = minf(g_DT, 0.2f);
 
     if (g_Zoom != state->zoomTarget) {
-	    float dz = g_DT * 3.0f;
+        float dz = g_DT * 1.7f;
         if (state->zoomTarget < 0.5f) {
             dz = -dz;
         }

@@ -62,7 +62,7 @@ public class Workspace extends ViewGroup implements DropTarget, DragSource, Drag
     /**
      * The velocity at which a fling gesture will cause us to snap to the next screen
      */
-    private static final int SNAP_VELOCITY = 600;
+    private static final int SNAP_VELOCITY = 400;
 
     private final WallpaperManager mWallpaperManager;
     
@@ -131,7 +131,7 @@ public class Workspace extends ViewGroup implements DropTarget, DragSource, Drag
     private static final float FLING_VELOCITY_INFLUENCE = 0.4f;
     
     private static class WorkspaceOvershootInterpolator implements Interpolator {
-        private static final float DEFAULT_TENSION = 1.3f;
+        private static final float DEFAULT_TENSION = 2.0f;
         private float mTension;
 
         public WorkspaceOvershootInterpolator() {
@@ -667,35 +667,42 @@ public class Workspace extends ViewGroup implements DropTarget, DragSource, Drag
                  * of the down event.
                  */
                 final int pointerIndex = ev.findPointerIndex(mActivePointerId);
-                final float x = ev.getX(pointerIndex);
-                final float y = ev.getY(pointerIndex);
-                final int xDiff = (int) Math.abs(x - mLastMotionX);
-                final int yDiff = (int) Math.abs(y - mLastMotionY);
+                if (pointerIndex != -1) {
+                    final float x = ev.getX(pointerIndex);
+                    final float y = ev.getY(pointerIndex);
+                    final int xDiff = (int) Math.abs(x - mLastMotionX);
+                    final int yDiff = (int) Math.abs(y - mLastMotionY);
 
-                final int touchSlop = mTouchSlop;
-                boolean xMoved = xDiff > touchSlop;
-                boolean yMoved = yDiff > touchSlop;
+                    final int touchSlop = mTouchSlop;
+                    boolean xMoved = xDiff > touchSlop;
+                    boolean yMoved = yDiff > touchSlop;
                 
-                if (xMoved || yMoved) {
-                    
-                    if (xMoved) {
-                        // Scroll if the user moved far enough along the X axis
-                        mTouchState = TOUCH_STATE_SCROLLING;
-                        mLastMotionX = x;
-                        mTouchX = mScrollX;
-                        mSmoothingTime = System.nanoTime() / NANOTIME_DIV;
-                        enableChildrenCache(mCurrentScreen - 1, mCurrentScreen + 1);
-                    }
-                    // Either way, cancel any pending longpress
-                    if (mAllowLongPress) {
-                        mAllowLongPress = false;
-                        // Try canceling the long press. It could also have been scheduled
-                        // by a distant descendant, so use the mAllowLongPress flag to block
-                        // everything
-                        final View currentScreen = getChildAt(mCurrentScreen);
-                        currentScreen.cancelLongPress();
+                    if (xMoved || yMoved) {
+
+                        if (xMoved) {
+                            // Scroll if the user moved far enough along the X axis
+                            mTouchState = TOUCH_STATE_SCROLLING;
+                            mLastMotionX = x;
+                            mTouchX = mScrollX;
+                            mSmoothingTime = System.nanoTime() / NANOTIME_DIV;
+                            enableChildrenCache(mCurrentScreen - 1, mCurrentScreen + 1);
+                        }
+                        // Either way, cancel any pending longpress
+                        if (mAllowLongPress) {
+                            mAllowLongPress = false;
+                            // Try canceling the long press. It could also have been scheduled
+                            // by a distant descendant, so use the mAllowLongPress flag to block
+                            // everything
+                            final View currentScreen = getChildAt(mCurrentScreen);
+                            currentScreen.cancelLongPress();
+                        }
                     }
                 }
+                else {
+                    // Do not intercept upon invalid pointer index
+                    mTouchState = TOUCH_STATE_REST;
+                }
+
                 break;
             }
 
@@ -726,10 +733,17 @@ public class Workspace extends ViewGroup implements DropTarget, DragSource, Drag
                         getLocationOnScreen(mTempCell);
                         // Send a tap to the wallpaper if the last down was on empty space
                         final int pointerIndex = ev.findPointerIndex(mActivePointerId);
-                        mWallpaperManager.sendWallpaperCommand(getWindowToken(), 
-                                "android.wallpaper.tap",
-                                mTempCell[0] + (int) ev.getX(pointerIndex),
-                                mTempCell[1] + (int) ev.getY(pointerIndex), 0, null);
+                        if (pointerIndex != -1) {
+                            try {
+                                 mWallpaperManager.sendWallpaperCommand(getWindowToken(),
+                                        "android.wallpaper.tap",
+                                        mTempCell[0] + (int) ev.getX(pointerIndex),
+                                        mTempCell[1] + (int) ev.getY(pointerIndex), 0, null);
+                            } catch(RuntimeException e) {
+                               Log.e(TAG,"MotionEvent invalid pointer Index [" + pointerIndex + "]");
+                               throw e;
+                            }
+                        }
                     }
                 }
                 
@@ -890,7 +904,7 @@ public class Workspace extends ViewGroup implements DropTarget, DragSource, Drag
             if (mTouchState == TOUCH_STATE_SCROLLING) {
                 final VelocityTracker velocityTracker = mVelocityTracker;
                 velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
-                final int velocityX = (int) velocityTracker.getXVelocity(mActivePointerId);
+                final int velocityX = 40 * (int) velocityTracker.getXVelocity(mActivePointerId);
                 
                 final int screenWidth = getWidth();
                 final int whichScreen = (mScrollX + (screenWidth / 2)) / screenWidth;
@@ -901,13 +915,13 @@ public class Workspace extends ViewGroup implements DropTarget, DragSource, Drag
                     // Don't fling across more than one screen at a time.
                     final int bound = scrolledPos < whichScreen ?
                             mCurrentScreen - 1 : mCurrentScreen;
-                    snapToScreen(Math.min(whichScreen, bound), velocityX, true);
+                    snapToScreen(Math.min(whichScreen, bound), velocityX, false);
                 } else if (velocityX < -SNAP_VELOCITY && mCurrentScreen < getChildCount() - 1) {
                     // Fling hard enough to move right
                     // Don't fling across more than one screen at a time.
                     final int bound = scrolledPos > whichScreen ?
                             mCurrentScreen + 1 : mCurrentScreen;
-                    snapToScreen(Math.max(whichScreen, bound), velocityX, true);
+                    snapToScreen(Math.max(whichScreen, bound), velocityX, false);
                 } else {
                     snapToScreen(whichScreen, 0, true);
                 }
@@ -974,7 +988,7 @@ public class Workspace extends ViewGroup implements DropTarget, DragSource, Drag
         final int screenDelta = Math.max(1, Math.abs(whichScreen - mCurrentScreen));
         final int newX = whichScreen * getWidth();
         final int delta = newX - mScrollX;
-        int duration = (screenDelta + 1) * 100;
+        int duration = (screenDelta + 1) * 60;
 
         if (!mScroller.isFinished()) {
             mScroller.abortAnimation();
@@ -991,7 +1005,7 @@ public class Workspace extends ViewGroup implements DropTarget, DragSource, Drag
             duration += (duration / (velocity / BASELINE_FLING_VELOCITY))
                     * FLING_VELOCITY_INFLUENCE;
         } else {
-            duration += 100;
+            duration += 60;
         }
 
         awakenScrollBars(duration);
