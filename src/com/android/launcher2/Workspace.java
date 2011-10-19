@@ -120,18 +120,18 @@ public class Workspace extends ViewGroup implements DropTarget, DragSource, Drag
     private Drawable mNextIndicator;
     
     private static final float NANOTIME_DIV = 1000000000.0f;
-    private static final float SMOOTHING_SPEED = 0.75f;
-    private static final float SMOOTHING_CONSTANT = (float) (0.016 / Math.log(SMOOTHING_SPEED));
+    private static final float SMOOTHING_SPEED = 1.0f;
+    private static final float SMOOTHING_CONSTANT = (float) (0.015 / Math.log(SMOOTHING_SPEED));
     private float mSmoothingTime;
     private float mTouchX;
 
     private WorkspaceOvershootInterpolator mScrollInterpolator;
 
-    private static final float BASELINE_FLING_VELOCITY = 2500.f;
-    private static final float FLING_VELOCITY_INFLUENCE = 0.4f;
+    private static final float BASELINE_FLING_VELOCITY = 2000.f;
+    private static final float FLING_VELOCITY_INFLUENCE = 0.8f;
     
     private static class WorkspaceOvershootInterpolator implements Interpolator {
-        private static final float DEFAULT_TENSION = 1.3f;
+        private static final float DEFAULT_TENSION = 2.0f;
         private float mTension;
 
         public WorkspaceOvershootInterpolator() {

@@ -84,8 +84,8 @@ public class WallpaperChooser extends Activity implements AdapterView.OnItemSele
         // package name should be.
         final String packageName = resources.getResourcePackageName(R.array.wallpapers);
 
-        addWallpapers(resources, packageName, R.array.wallpapers);
         addWallpapers(resources, packageName, R.array.extra_wallpapers);
+        addWallpapers(resources, packageName, R.array.wallpapers);
     }
 
     private void addWallpapers(Resources resources, String packageName, int list) {
