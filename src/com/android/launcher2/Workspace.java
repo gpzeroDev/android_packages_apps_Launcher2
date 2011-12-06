@@ -633,9 +633,8 @@ public class Workspace extends ViewGroup implements DropTarget, DragSource, Drag
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        final boolean workspaceLocked = mLauncher.isWorkspaceLocked();
         final boolean allAppsVisible = mLauncher.isAllAppsVisible();
-        if (workspaceLocked || allAppsVisible) {
+        if (allAppsVisible) {
             return false; // We don't want the events.  Let them fall through to the all apps view.
         }
 
@@ -669,42 +668,35 @@ public class Workspace extends ViewGroup implements DropTarget, DragSource, Drag
                  * of the down event.
                  */
                 final int pointerIndex = ev.findPointerIndex(mActivePointerId);
-                if (pointerIndex != -1) {
-                    final float x = ev.getX(pointerIndex);
-                    final float y = ev.getY(pointerIndex);
-                    final int xDiff = (int) Math.abs(x - mLastMotionX);
-                    final int yDiff = (int) Math.abs(y - mLastMotionY);
+                final float x = ev.getX(pointerIndex);
+                final float y = ev.getY(pointerIndex);
+                final int xDiff = (int) Math.abs(x - mLastMotionX);
+                final int yDiff = (int) Math.abs(y - mLastMotionY);
 
-                    final int touchSlop = mTouchSlop;
-                    boolean xMoved = xDiff > touchSlop;
-                    boolean yMoved = yDiff > touchSlop;
+                final int touchSlop = mTouchSlop;
+                boolean xMoved = xDiff > touchSlop;
+                boolean yMoved = yDiff > touchSlop;
                 
-                    if (xMoved || yMoved) {
-
-                        if (xMoved) {
-                            // Scroll if the user moved far enough along the X axis
-                            mTouchState = TOUCH_STATE_SCROLLING;
-                            mLastMotionX = x;
-                            mTouchX = mScrollX;
-                            mSmoothingTime = System.nanoTime() / NANOTIME_DIV;
-                            enableChildrenCache(mCurrentScreen - 1, mCurrentScreen + 1);
-                        }
-                        // Either way, cancel any pending longpress
-                        if (mAllowLongPress) {
-                            mAllowLongPress = false;
-                            // Try canceling the long press. It could also have been scheduled
-                            // by a distant descendant, so use the mAllowLongPress flag to block
-                            // everything
-                            final View currentScreen = getChildAt(mCurrentScreen);
-                            currentScreen.cancelLongPress();
-                        }
+                if (xMoved || yMoved) {
+                    
+                    if (xMoved) {
+                        // Scroll if the user moved far enough along the X axis
+                        mTouchState = TOUCH_STATE_SCROLLING;
+                        mLastMotionX = x;
+                        mTouchX = mScrollX;
+                        mSmoothingTime = System.nanoTime() / NANOTIME_DIV;
+                        enableChildrenCache(mCurrentScreen - 1, mCurrentScreen + 1);
+                    }
+                    // Either way, cancel any pending longpress
+                    if (mAllowLongPress) {
+                        mAllowLongPress = false;
+                        // Try canceling the long press. It could also have been scheduled
+                        // by a distant descendant, so use the mAllowLongPress flag to block
+                        // everything
+                        final View currentScreen = getChildAt(mCurrentScreen);
+                        currentScreen.cancelLongPress();
                     }
                 }
-                else {
-                    // Do not intercept upon invalid pointer index
-                    mTouchState = TOUCH_STATE_REST;
-                }
-
                 break;
             }
 
@@ -735,17 +727,10 @@ public class Workspace extends ViewGroup implements DropTarget, DragSource, Drag
                         getLocationOnScreen(mTempCell);
                         // Send a tap to the wallpaper if the last down was on empty space
                         final int pointerIndex = ev.findPointerIndex(mActivePointerId);
-                        if (pointerIndex != -1) {
-                            try {
-                                 mWallpaperManager.sendWallpaperCommand(getWindowToken(),
-                                        "android.wallpaper.tap",
-                                        mTempCell[0] + (int) ev.getX(pointerIndex),
-                                        mTempCell[1] + (int) ev.getY(pointerIndex), 0, null);
-                            } catch(RuntimeException e) {
-                               Log.e(TAG,"MotionEvent invalid pointer Index [" + pointerIndex + "]");
-                               throw e;
-                            }
-                        }
+                        mWallpaperManager.sendWallpaperCommand(getWindowToken(), 
+                                "android.wallpaper.tap",
+                                mTempCell[0] + (int) ev.getX(pointerIndex),
+                                mTempCell[1] + (int) ev.getY(pointerIndex), 0, null);
                     }
                 }
                 
@@ -845,9 +830,6 @@ public class Workspace extends ViewGroup implements DropTarget, DragSource, Drag
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         
-        if (mLauncher.isWorkspaceLocked()) {
-            return false; // We don't want the events.  Let them fall through to the all apps view.
-        }
         if (mLauncher.isAllAppsVisible()) {
             // Cancel any scrolling that is in progress.
             if (!mScroller.isFinished()) {
@@ -909,7 +891,7 @@ public class Workspace extends ViewGroup implements DropTarget, DragSource, Drag
             if (mTouchState == TOUCH_STATE_SCROLLING) {
                 final VelocityTracker velocityTracker = mVelocityTracker;
                 velocityTracker.computeCurrentVelocity(1750, mMaximumVelocity);
-		final int vMultiplier = 4;
+				final int vMultiplier = 4;
                 final int velocityX = vMultiplier * (int) velocityTracker.getXVelocity(mActivePointerId);
                 
                 final int screenWidth = getWidth();

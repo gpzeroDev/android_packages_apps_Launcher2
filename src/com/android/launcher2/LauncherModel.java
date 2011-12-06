@@ -370,11 +370,6 @@ public class LauncherModel extends BroadcastReceiver {
                         PackageUpdatedTask.OP_UNAVAILABLE, packages));
 
         }
-        if (Intent.ACTION_LOCALE_CHANGED.equals(action)) {
-           synchronized (this) {
-               mAllAppsLoaded = false;
-           }
-       }
     }
 
     public void startLoader(Context context, boolean isLaunching) {
